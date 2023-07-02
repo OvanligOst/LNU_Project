@@ -12,13 +12,9 @@ import network                # For use for network connectivity
 
 # --- Global variables ---
   
-
 # Adafruit IO (AIO) configuration
 AIO_SERVER = "io.adafruit.com"
 AIO_PORT = 1883
-AIO_USER = cred.IO_USERNAME
-AIO_KEY = cred.IO_KEY
-AIO_CLIENT_ID = ubinascii.hexlify(mac.unique_id())  # Can be anything
 AIO_LIGHT_FEED = "Laderlappen/feeds/wine-light"
 AIO_TEMP_FEED = "Laderlappen/feeds/wine-temp"
 AIO_HUM_FEED = "Laderlappen/feeds/wine-hum"
@@ -111,8 +107,8 @@ def vibration():
    connectAdaFruit()
    client.publish(topic=AIO_VIB_FEED, msg="1")
    disconnectAdaFruit()
-   #flashLed(3)
-   #time.sleep(3)
+   flashLed(3)
+   time.sleep(3)
 
 
 # Function for getting light readings
@@ -200,17 +196,25 @@ def flashLed(integer):
         led.toggle()
 
 
-
 # --- Main ---
 def main():
+    # Adafruit IO (AIO) configuration
+
+    AIO_USER = cred.IO_USERNAME
+    AIO_KEY = cred.IO_KEY
+    AIO_CLIENT_ID = ubinascii.hexlify(mac.unique_id())  # Can be anything
+
+
     connectNetwork()
     # For getting vibration readings, triggers if vibration detected.
-    vibPin.irq(trigger=mac.Pin.IRQ_FALLING, handler=vibration)
     #MQTT client variable
     global client
-    client = MQTTClient(AIO_CLIENT_ID, AIO_SERVER, AIO_PORT, AIO_USER, AIO_KEY)
-    # Send data for visualisation
     # Use the MQTT protocol to connect to Adafruit IO
+    client = MQTTClient(AIO_CLIENT_ID, AIO_SERVER, AIO_PORT, AIO_USER, AIO_KEY)
+
+    #Create trigger mechanism for vibration sensor
+    vibPin.irq(trigger=mac.Pin.IRQ_FALLING, handler=vibration())
+
 
     while True:
         try:
